@@ -12,3 +12,6 @@ template.html
 needs/
 config_*.json
 encrypt.sh
+build_yaru.py
+yaru_template.html
+yaru_*.json
