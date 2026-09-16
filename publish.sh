@@ -14,10 +14,13 @@ command -v staticrypt >/dev/null || { echo "staticrypt が未インストール:
 PW="$(security find-generic-password -a karte -s karte-site -w 2>/dev/null || true)"
 [ -n "$PW" ] || { echo "Keychainにパスワードがありません: security add-generic-password -a karte -s karte-site -w"; exit 1; }
 mkdir -p docs
-STATICRYPT_PASSWORD="$PW" staticrypt "$SRC" -d docs --short --remember 7 \
+STATICRYPT_PASSWORD="$PW" staticrypt "$SRC" -d docs --short --remember 30 \
   --template-title "惣菜カルテ" --template-instructions "パスワードを入力してください" \
   --template-button "開く" --template-placeholder "パスワード" --template-error "パスワードが違います" \
-  --template-remember "このブラウザで7日間記憶する" --template-color-primary "#ED7D31" --template-color-secondary "#F7F4F0" >/dev/null
+  --template-remember "このブラウザで30日間記憶する（再読み込みしても入力不要）" --template-color-primary "#ED7D31" --template-color-secondary "#F7F4F0" >/dev/null
+# 「記憶する」を最初からチェック済みにする（再読み込みで弾かれないように）
+sed -i "" -E 's/(id="staticrypt-remember"[^>]*type="checkbox")/\1 checked/; s/(type="checkbox"[^>]*id="staticrypt-remember")/\1 checked/' docs/index.html
+grep -q 'id="staticrypt-remember"[^>]*checked\|checked[^>]*id="staticrypt-remember"' docs/index.html || echo "注意: 記憶チェックの自動ONに失敗（テンプレートの構造が変わった可能性）"
 unset PW
 # 平文が docs に混ざっていないか確認
 grep -q "staticrypt" docs/index.html || { echo "暗号化に失敗（docs/index.htmlが平文の可能性）"; exit 1; }
